@@ -202,8 +202,8 @@ async def main():
     
     for attempt in range(max_retries):
         try:
-            # Connect to Coral server using the correct configuration
-            async with MultiServerMCPClient(
+            # Connect to Coral server using the new API (langchain-mcp-adapters 0.1.0+)
+            client = MultiServerMCPClient(
                 connections={
                     "coral": {
                         "transport": "sse",
@@ -212,185 +212,186 @@ async def main():
                         "sse_read_timeout": 300,
                     }
                 }
-            ) as client:
-                logger.info(f"Connected to Coral server at {CORAL_SERVER_URL}")
+            )
+            
+            logger.info(f"Connected to Coral server at {CORAL_SERVER_URL}")
+            
+            # Wait a moment for registration
+            await asyncio.sleep(2)
+            
+            # List agents to verify connection
+            try:
+                agents = await client.connections["coral"].invoke_tool("list_agents", {})
+                logger.info(f"Available agents: {agents}")
+            except Exception as e:
+                logger.warning(f"Could not list agents: {e}")
+            
+            # Get tools from Coral Protocol using new API
+            coral_tools = await client.get_tools()
+            logger.info(f"Available tools from Coral network: {[tool.name for tool in coral_tools]}")
+            
+            # Add Agent Angus's specialized tools
+            angus_tools = [
+                # YouTube Tools
+                Tool(
+                    name="upload_song_to_youtube",
+                    func=upload_song_to_youtube,
+                    description="Upload a song video to YouTube with metadata and tags.",
+                    coroutine=upload_song_to_youtube
+                ),
+                Tool(
+                    name="fetch_youtube_comments",
+                    func=fetch_youtube_comments,
+                    description="Fetch comments from a YouTube video for processing.",
+                    coroutine=fetch_youtube_comments
+                ),
+                Tool(
+                    name="reply_to_youtube_comment",
+                    func=reply_to_youtube_comment,
+                    description="Reply to a specific YouTube comment with generated text.",
+                    coroutine=reply_to_youtube_comment
+                ),
+                Tool(
+                    name="check_upload_quota",
+                    func=check_upload_quota,
+                    description="Check YouTube API upload quota status and limits.",
+                    coroutine=check_upload_quota
+                ),
+                Tool(
+                    name="get_video_details",
+                    func=get_video_details,
+                    description="Get details and metadata for a YouTube video.",
+                    coroutine=get_video_details
+                ),
+                Tool(
+                    name="process_video_comments",
+                    func=process_video_comments,
+                    description="Process all comments for a video: fetch, analyze, and reply.",
+                    coroutine=process_video_comments
+                ),
                 
-                # Wait a moment for registration
-                await asyncio.sleep(2)
+                # Database Tools
+                Tool(
+                    name="get_pending_songs",
+                    func=get_pending_songs,
+                    description="Get songs that are ready for YouTube upload from the database.",
+                    coroutine=get_pending_songs
+                ),
+                Tool(
+                    name="get_song_details",
+                    func=get_song_details,
+                    description="Retrieve detailed information about a specific song from the database.",
+                    coroutine=get_song_details
+                ),
+                Tool(
+                    name="update_song_status",
+                    func=update_song_status,
+                    description="Update the upload status of a song in the database.",
+                    coroutine=update_song_status
+                ),
+                Tool(
+                    name="get_uploaded_videos",
+                    func=get_uploaded_videos,
+                    description="Get videos that have been uploaded to YouTube from the database.",
+                    coroutine=get_uploaded_videos
+                ),
+                Tool(
+                    name="store_feedback",
+                    func=store_feedback,
+                    description="Store YouTube comment feedback in the database.",
+                    coroutine=store_feedback
+                ),
+                Tool(
+                    name="get_existing_feedback",
+                    func=get_existing_feedback,
+                    description="Get existing feedback for a song to avoid duplicate processing.",
+                    coroutine=get_existing_feedback
+                ),
+                Tool(
+                    name="log_agent_activity",
+                    func=log_agent_activity,
+                    description="Log agent activities and system events to the database.",
+                    coroutine=log_agent_activity
+                ),
                 
-                # List agents to verify connection
-                try:
-                    agents = await client.connections["coral"].invoke_tool("list_agents", {})
-                    logger.info(f"Available agents: {agents}")
-                except Exception as e:
-                    logger.warning(f"Could not list agents: {e}")
+                # AI Tools
+                Tool(
+                    name="analyze_music_content",
+                    func=analyze_music_content,
+                    description="Analyze music content using OpenAI to extract themes, genres, and moods.",
+                    coroutine=analyze_music_content
+                ),
+                Tool(
+                    name="generate_comment_response",
+                    func=generate_comment_response,
+                    description="Generate appropriate responses to YouTube comments using AI.",
+                    coroutine=generate_comment_response
+                ),
+                Tool(
+                    name="extract_music_metadata",
+                    func=extract_music_metadata,
+                    description="Extract detailed metadata from music files using AI analysis.",
+                    coroutine=extract_music_metadata
+                ),
+                Tool(
+                    name="analyze_comment_sentiment",
+                    func=analyze_comment_sentiment,
+                    description="Analyze the sentiment and tone of YouTube comments.",
+                    coroutine=analyze_comment_sentiment
+                ),
+                Tool(
+                    name="generate_song_description",
+                    func=generate_song_description,
+                    description="Generate compelling descriptions for songs and videos.",
+                    coroutine=generate_song_description
+                ),
+                Tool(
+                    name="suggest_video_tags",
+                    func=suggest_video_tags,
+                    description="Suggest relevant tags for YouTube videos based on content.",
+                    coroutine=suggest_video_tags
+                ),
                 
-                # Get tools from Coral Protocol
-                coral_tools = client.get_tools()
-                logger.info(f"Available tools from Coral network: {[tool.name for tool in coral_tools]}")
+                # Workflow Tools
+                Tool(
+                    name="upload_workflow",
+                    func=upload_workflow,
+                    description="Execute the complete song upload workflow: get pending songs, upload to YouTube, update status.",
+                    coroutine=upload_workflow
+                ),
+                Tool(
+                    name="comment_processing_workflow",
+                    func=comment_processing_workflow,
+                    description="Execute the complete comment processing workflow: get videos, fetch comments, generate replies, post responses.",
+                    coroutine=comment_processing_workflow
+                ),
                 
-                # Add Agent Angus's specialized tools
-                angus_tools = [
-                    # YouTube Tools
-                    Tool(
-                        name="upload_song_to_youtube",
-                        func=upload_song_to_youtube,
-                        description="Upload a song video to YouTube with metadata and tags.",
-                        coroutine=upload_song_to_youtube
-                    ),
-                    Tool(
-                        name="fetch_youtube_comments",
-                        func=fetch_youtube_comments,
-                        description="Fetch comments from a YouTube video for processing.",
-                        coroutine=fetch_youtube_comments
-                    ),
-                    Tool(
-                        name="reply_to_youtube_comment",
-                        func=reply_to_youtube_comment,
-                        description="Reply to a specific YouTube comment with generated text.",
-                        coroutine=reply_to_youtube_comment
-                    ),
-                    Tool(
-                        name="check_upload_quota",
-                        func=check_upload_quota,
-                        description="Check YouTube API upload quota status and limits.",
-                        coroutine=check_upload_quota
-                    ),
-                    Tool(
-                        name="get_video_details",
-                        func=get_video_details,
-                        description="Get details and metadata for a YouTube video.",
-                        coroutine=get_video_details
-                    ),
-                    Tool(
-                        name="process_video_comments",
-                        func=process_video_comments,
-                        description="Process all comments for a video: fetch, analyze, and reply.",
-                        coroutine=process_video_comments
-                    ),
-                    
-                    # Database Tools
-                    Tool(
-                        name="get_pending_songs",
-                        func=get_pending_songs,
-                        description="Get songs that are ready for YouTube upload from the database.",
-                        coroutine=get_pending_songs
-                    ),
-                    Tool(
-                        name="get_song_details",
-                        func=get_song_details,
-                        description="Retrieve detailed information about a specific song from the database.",
-                        coroutine=get_song_details
-                    ),
-                    Tool(
-                        name="update_song_status",
-                        func=update_song_status,
-                        description="Update the upload status of a song in the database.",
-                        coroutine=update_song_status
-                    ),
-                    Tool(
-                        name="get_uploaded_videos",
-                        func=get_uploaded_videos,
-                        description="Get videos that have been uploaded to YouTube from the database.",
-                        coroutine=get_uploaded_videos
-                    ),
-                    Tool(
-                        name="store_feedback",
-                        func=store_feedback,
-                        description="Store YouTube comment feedback in the database.",
-                        coroutine=store_feedback
-                    ),
-                    Tool(
-                        name="get_existing_feedback",
-                        func=get_existing_feedback,
-                        description="Get existing feedback for a song to avoid duplicate processing.",
-                        coroutine=get_existing_feedback
-                    ),
-                    Tool(
-                        name="log_agent_activity",
-                        func=log_agent_activity,
-                        description="Log agent activities and system events to the database.",
-                        coroutine=log_agent_activity
-                    ),
-                    
-                    # AI Tools
-                    Tool(
-                        name="analyze_music_content",
-                        func=analyze_music_content,
-                        description="Analyze music content using OpenAI to extract themes, genres, and moods.",
-                        coroutine=analyze_music_content
-                    ),
-                    Tool(
-                        name="generate_comment_response",
-                        func=generate_comment_response,
-                        description="Generate appropriate responses to YouTube comments using AI.",
-                        coroutine=generate_comment_response
-                    ),
-                    Tool(
-                        name="extract_music_metadata",
-                        func=extract_music_metadata,
-                        description="Extract detailed metadata from music files using AI analysis.",
-                        coroutine=extract_music_metadata
-                    ),
-                    Tool(
-                        name="analyze_comment_sentiment",
-                        func=analyze_comment_sentiment,
-                        description="Analyze the sentiment and tone of YouTube comments.",
-                        coroutine=analyze_comment_sentiment
-                    ),
-                    Tool(
-                        name="generate_song_description",
-                        func=generate_song_description,
-                        description="Generate compelling descriptions for songs and videos.",
-                        coroutine=generate_song_description
-                    ),
-                    Tool(
-                        name="suggest_video_tags",
-                        func=suggest_video_tags,
-                        description="Suggest relevant tags for YouTube videos based on content.",
-                        coroutine=suggest_video_tags
-                    ),
-                    
-                    # Workflow Tools
-                    Tool(
-                        name="upload_workflow",
-                        func=upload_workflow,
-                        description="Execute the complete song upload workflow: get pending songs, upload to YouTube, update status.",
-                        coroutine=upload_workflow
-                    ),
-                    Tool(
-                        name="comment_processing_workflow",
-                        func=comment_processing_workflow,
-                        description="Execute the complete comment processing workflow: get videos, fetch comments, generate replies, post responses.",
-                        coroutine=comment_processing_workflow
-                    ),
-                    
-                    # Team Yona Communication Tool
-                    Tool(
-                        name="request_song_creation",
-                        func=lambda prompt: request_song_creation(client, prompt),
-                        description="Request Team Yona to create a song with the given prompt.",
-                        coroutine=lambda prompt: request_song_creation(client, prompt)
-                    )
-                ]
-                
-                # Combine all tools
-                all_tools = coral_tools + angus_tools
-                
-                logger.info(f"Agent Angus tools available: {[tool.name for tool in angus_tools]}")
-                logger.info(f"Total tools available: {len(all_tools)}")
-                
-                # Create the Agent Angus
-                model = ChatOpenAI(
-                    model="gpt-4o",
-                    model_provider="openai",
-                    api_key=os.getenv("OPENAI_API_KEY")
+                # Team Yona Communication Tool
+                Tool(
+                    name="request_song_creation",
+                    func=lambda prompt: request_song_creation(client, prompt),
+                    description="Request Team Yona to create a song with the given prompt.",
+                    coroutine=lambda prompt: request_song_creation(client, prompt)
                 )
-                
-                prompt = ChatPromptTemplate.from_messages([
-                    (
-                        "system",
-                        f"""You are Agent Angus, an AI agent specialized in music publishing automation, now connected to the Coral Protocol network.
+            ]
+            
+            # Combine all tools
+            all_tools = coral_tools + angus_tools
+            
+            logger.info(f"Agent Angus tools available: {[tool.name for tool in angus_tools]}")
+            logger.info(f"Total tools available: {len(all_tools)}")
+            
+            # Create the Agent Angus
+            model = ChatOpenAI(
+                model="gpt-4o",
+                model_provider="openai",
+                api_key=os.getenv("OPENAI_API_KEY")
+            )
+            
+            prompt = ChatPromptTemplate.from_messages([
+                (
+                    "system",
+                    f"""You are Agent Angus, an AI agent specialized in music publishing automation, now connected to the Coral Protocol network.
 
 Your core capabilities:
 🎵 MUSIC PUBLISHING AUTOMATION:
@@ -421,15 +422,15 @@ Your core capabilities:
 - Process comments and feedback on collaborative content
 
 Always be helpful, accurate, and focused on music publishing workflows while being a good collaborator on the Coral Protocol network."""
-                    ),
-                    ("placeholder", "{agent_scratchpad}")
-                ])
-                
-                agent = create_tool_calling_agent(model, all_tools, prompt)
-                agent_executor = AgentExecutor(agent=agent, tools=all_tools, verbose=True)
-                
-                # Main Agent Angus loop
-                print(f"""
+                ),
+                ("placeholder", "{agent_scratchpad}")
+            ])
+            
+            agent = create_tool_calling_agent(model, all_tools, prompt)
+            agent_executor = AgentExecutor(agent=agent, tools=all_tools, verbose=True)
+            
+            # Main Agent Angus loop
+            print(f"""
 🎵 ═══════════════════════════════════════════════════════════════════════════════ 🎵
    
     ░█████╗░░██████╗░███████╗███╗░░██╗████████╗  ░█████╗░███╗░░██╗░██████╗░██╗░░░██╗░██████╗
@@ -465,30 +466,30 @@ Available commands:
 🛠️  Agent Angus tools: {len(angus_tools)} specialized music tools
 🤝 Ready to collaborate with Team Yona!
 """)
-                
-                while True:
-                    try:
-                        user_input = input(f"\n{AGENT_NAME}> ").strip()
-                        
-                        if user_input.lower() == 'quit':
-                            print("🌊 Disconnecting from Coral Protocol network...")
-                            break
-                        elif user_input.lower() == 'status':
-                            print(f"🟢 Agent Angus: Connected to Coral Protocol")
-                            print(f"🌊 Coral Server: coral.pushcollective.club:5555")
-                            print(f"🆔 Agent ID: {AGENT_NAME}")
-                            print(f"🎯 Target Agent: {TARGET_AGENT}")
-                            print(f"🛠️  Total tools available: {len(all_tools)}")
-                            print(f"🎵 Angus tools: {len(angus_tools)}")
-                            print(f"🌊 Network tools: {len(coral_tools)}")
-                        elif user_input.lower() == 'agents':
-                            try:
-                                agents = await client.connections["coral"].invoke_tool("list_agents", {})
-                                print(f"🤝 Connected agents: {agents}")
-                            except Exception as e:
-                                print(f"❌ Could not list agents: {e}")
-                        elif user_input.lower() == 'help':
-                            print("""
+            
+            while True:
+                try:
+                    user_input = input(f"\n{AGENT_NAME}> ").strip()
+                    
+                    if user_input.lower() == 'quit':
+                        print("🌊 Disconnecting from Coral Protocol network...")
+                        break
+                    elif user_input.lower() == 'status':
+                        print(f"🟢 Agent Angus: Connected to Coral Protocol")
+                        print(f"🌊 Coral Server: coral.pushcollective.club:5555")
+                        print(f"🆔 Agent ID: {AGENT_NAME}")
+                        print(f"🎯 Target Agent: {TARGET_AGENT}")
+                        print(f"🛠️  Total tools available: {len(all_tools)}")
+                        print(f"🎵 Angus tools: {len(angus_tools)}")
+                        print(f"🌊 Network tools: {len(coral_tools)}")
+                    elif user_input.lower() == 'agents':
+                        try:
+                            agents = await client.connections["coral"].invoke_tool("list_agents", {})
+                            print(f"🤝 Connected agents: {agents}")
+                        except Exception as e:
+                            print(f"❌ Could not list agents: {e}")
+                    elif user_input.lower() == 'help':
+                        print("""
 🎵 Agent Angus - Music Publishing Automation on Coral Protocol
 
 WORKFLOWS:
@@ -520,65 +521,65 @@ EXAMPLES:
   analyze "electronic dance music"
   pending           - List songs waiting for upload
 """)
-                        elif user_input.startswith('upload'):
-                            parts = user_input.split()
-                            limit = int(parts[1]) if len(parts) > 1 else 5
+                    elif user_input.startswith('upload'):
+                        parts = user_input.split()
+                        limit = int(parts[1]) if len(parts) > 1 else 5
+                        result = await agent_executor.ainvoke({
+                            "input": f"Execute the upload workflow for {limit} songs. Use the upload_workflow tool to handle the complete process."
+                        })
+                        print(f"Result: {result['output']}")
+                    elif user_input.startswith('comments'):
+                        parts = user_input.split()
+                        limit = int(parts[1]) if len(parts) > 1 else 10
+                        result = await agent_executor.ainvoke({
+                            "input": f"Execute the comment processing workflow for {limit} replies. Use the comment_processing_workflow tool to handle the complete process."
+                        })
+                        print(f"Result: {result['output']}")
+                    elif user_input.startswith('create'):
+                        prompt = user_input[6:].strip()
+                        if prompt:
                             result = await agent_executor.ainvoke({
-                                "input": f"Execute the upload workflow for {limit} songs. Use the upload_workflow tool to handle the complete process."
-                            })
-                            print(f"Result: {result['output']}")
-                        elif user_input.startswith('comments'):
-                            parts = user_input.split()
-                            limit = int(parts[1]) if len(parts) > 1 else 10
-                            result = await agent_executor.ainvoke({
-                                "input": f"Execute the comment processing workflow for {limit} replies. Use the comment_processing_workflow tool to handle the complete process."
-                            })
-                            print(f"Result: {result['output']}")
-                        elif user_input.startswith('create'):
-                            prompt = user_input[6:].strip()
-                            if prompt:
-                                result = await agent_executor.ainvoke({
-                                    "input": f"Request Team Yona to create a song with this prompt: {prompt}"
-                                })
-                                print(f"Result: {result['output']}")
-                            else:
-                                print("Please provide a song creation prompt")
-                        elif user_input.startswith('analyze'):
-                            content = user_input[7:].strip()
-                            if content:
-                                result = await agent_executor.ainvoke({
-                                    "input": f"Analyze this music content: {content}"
-                                })
-                                print(f"Result: {result['output']}")
-                            else:
-                                print("Please provide content to analyze")
-                        elif user_input.lower() == 'quota':
-                            result = await agent_executor.ainvoke({
-                                "input": "Check the current YouTube API quota status and usage limits."
-                            })
-                            print(f"Result: {result['output']}")
-                        elif user_input.lower() == 'pending':
-                            result = await agent_executor.ainvoke({
-                                "input": "Get pending songs that are ready for YouTube upload."
-                            })
-                            print(f"Result: {result['output']}")
-                        elif user_input.lower() == 'videos':
-                            result = await agent_executor.ainvoke({
-                                "input": "Get uploaded videos from the database."
+                                "input": f"Request Team Yona to create a song with this prompt: {prompt}"
                             })
                             print(f"Result: {result['output']}")
                         else:
-                            # General query - let the agent handle it
-                            result = await agent_executor.ainvoke({"input": user_input})
+                            print("Please provide a song creation prompt")
+                    elif user_input.startswith('analyze'):
+                        content = user_input[7:].strip()
+                        if content:
+                            result = await agent_executor.ainvoke({
+                                "input": f"Analyze this music content: {content}"
+                            })
                             print(f"Result: {result['output']}")
-                            
-                    except KeyboardInterrupt:
-                        print("\n🌊 Disconnecting from Coral Protocol network...")
-                        break
-                    except Exception as e:
-                        logger.error(f"Error in Agent Angus loop: {e}")
-                        print(f"Error: {e}")
+                        else:
+                            print("Please provide content to analyze")
+                    elif user_input.lower() == 'quota':
+                        result = await agent_executor.ainvoke({
+                            "input": "Check the current YouTube API quota status and usage limits."
+                        })
+                        print(f"Result: {result['output']}")
+                    elif user_input.lower() == 'pending':
+                        result = await agent_executor.ainvoke({
+                            "input": "Get pending songs that are ready for YouTube upload."
+                        })
+                        print(f"Result: {result['output']}")
+                    elif user_input.lower() == 'videos':
+                        result = await agent_executor.ainvoke({
+                            "input": "Get uploaded videos from the database."
+                        })
+                        print(f"Result: {result['output']}")
+                    else:
+                        # General query - let the agent handle it
+                        result = await agent_executor.ainvoke({"input": user_input})
+                        print(f"Result: {result['output']}")
                         
+                except KeyboardInterrupt:
+                    print("\n🌊 Disconnecting from Coral Protocol network...")
+                    break
+                except Exception as e:
+                    logger.error(f"Error in Agent Angus loop: {e}")
+                    print(f"Error: {e}")
+                    
         except Exception as e:
             logger.error(f"Connection error on attempt {attempt + 1}: {e}")
             if attempt < max_retries - 1:
