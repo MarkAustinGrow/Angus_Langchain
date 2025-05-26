@@ -9,14 +9,14 @@ import logging
 from typing import Dict, Any, List, Optional
 from langchain.tools import tool
 
-# Add the original Angus directory to the path
-sys.path.append('/opt/Angus-vibe')
-
+# Import our simplified YouTube client
 try:
-    from youtube_client import YouTubeClient
+    from youtube_client_langchain import YouTubeClient
+    YOUTUBE_CLIENT_AVAILABLE = True
 except ImportError:
-    # Fallback for when running without the original Angus code
+    # Fallback for when the client is not available
     YouTubeClient = None
+    YOUTUBE_CLIENT_AVAILABLE = False
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ def get_youtube_client() -> YouTubeClient:
     global _youtube_client
     if _youtube_client is None:
         if YouTubeClient is None:
-            raise ImportError("YouTubeClient not available. Make sure the original Angus code is accessible.")
+            raise ImportError("YouTubeClient not available. Make sure youtube_client_langchain.py is accessible.")
         _youtube_client = YouTubeClient()
     return _youtube_client
 
