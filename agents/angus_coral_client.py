@@ -381,10 +381,9 @@ async def main():
             logger.info(f"Agent Angus tools available: {[tool.name for tool in angus_tools]}")
             logger.info(f"Total tools available: {len(all_tools)}")
             
-            # Create the Agent Angus
+            # Create the Agent Angus (fixed: removed invalid model_provider parameter)
             model = ChatOpenAI(
                 model="gpt-4o",
-                model_provider="openai",
                 api_key=os.getenv("OPENAI_API_KEY")
             )
             
