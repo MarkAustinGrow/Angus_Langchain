@@ -1,137 +1,158 @@
-# Agent Angus LangChain + Coral Protocol
+# 🎵 Agent Angus + Coral Protocol Client
 
-A modern, distributed multi-agent system that rebuilds Agent Angus using LangChain tools and Coral Protocol for scalable music publishing automation.
+A sophisticated AI agent that connects to the Coral Protocol network for distributed music publishing automation on YouTube.
 
-## 🎯 Overview
+## 🌟 Features
 
-This project transforms the original monolithic Agent Angus into a distributed multi-agent system that:
-
-- **Uploads songs** from Supabase to YouTube
-- **Fetches and processes** YouTube comments  
-- **Generates AI responses** using OpenAI
-- **Analyzes music content** for metadata and insights
-- **Stores feedback** and tracks upload status
-- **Scales horizontally** using Coral Protocol's distributed architecture
+- **Automated Song Upload**: Upload songs from Supabase to YouTube with AI-generated metadata
+- **Intelligent Comment Processing**: Fetch and respond to YouTube comments using OpenAI
+- **Music Analysis**: AI-powered analysis of musical content for themes, genres, and moods
+- **Coral Protocol Integration**: Connect to the Coral network to collaborate with other AI agents
+- **Real-time Monitoring**: Track system performance and agent health
+- **Robust Error Handling**: Graceful handling of API limits and network issues
 
 ## 🏗️ Architecture
 
+### Standalone LangChain Agent ✅ COMPLETE
+A unified LangChain agent that replicates all original Agent Angus functionality:
+
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ Coordinator     │    │ YouTube Agent   │    │ Database Agent  │
-│ Agent           │◄──►│                 │◄──►│                 │
-│ (Main Angus)    │    │ - Upload videos │    │ - Supabase ops  │
-└─────────────────┘    │ - Fetch comments│    │ - Store feedback│
-         ▲              │ - Reply to comm.│    │ - Update status │
-         │              └─────────────────┘    └─────────────────┘
-         ▼                        ▲                       ▲
-┌─────────────────┐              │                       │
-│ AI Agent        │              │                       │
-│                 │◄─────────────┴───────────────────────┘
-│ - Music analysis│
-│ - Comment resp. │              Coral Protocol Server
-│ - OpenAI calls  │         ┌─────────────────────────────┐
-└─────────────────┘         │ - Agent registration        │
-                            │ - Message routing           │
-                            │ - Load balancing            │
-                            │ - Monitoring & logging      │
-                            └─────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                 Unified LangChain Agent                     │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
+│  │ YouTube     │ │ Database    │ │ AI Tools                │ │
+│  │ Tools (6)   │ │ Tools (7)   │ │ (6)                     │ │
+│  └─────────────┘ └─────────────┘ └─────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │ OpenAI GPT-4o   │
+                    │ Agent Executor  │
+                    └─────────────────┘
+```
+
+### Coral Protocol Client ✅ COMPLETE
+Agent Angus as a client connected to the Coral Protocol network:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Agent Angus                              │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │
+│  │ YouTube     │ │ Database    │ │ AI Tools                │ │
+│  │ Tools (6)   │ │ Tools (7)   │ │ (6)                     │ │
+│  └─────────────┘ └─────────────┘ └─────────────────────────┘ │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              Workflow Tools (2)                        │ │
+│  │  • upload_workflow • comment_processing_workflow       │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                    ┌─────────────────┐
+                    │ OpenAI GPT-4o   │
+                    │ Agent Executor  │
+                    └─────────────────┘
+                              │
+                              ▼
+              🌊 Coral Protocol Network 🌊
+         ┌─────────────────────────────────────┐
+         │    https://coral.pushcollective.club │
+         │                                     │
+         │  ┌─────────────┐ ┌─────────────────┐ │
+         │  │ Other AI    │ │ Network Tools   │ │
+         │  │ Agents      │ │ & Resources     │ │
+         │  └─────────────┘ └─────────────────┘ │
+         └─────────────────────────────────────┘
 ```
 
 ## 🚀 Quick Start
 
-### 1. Prerequisites
+### Prerequisites
 
 - Python 3.8+
-- Access to original Agent Angus codebase (for YouTube/Supabase clients)
-- Required API keys (OpenAI, YouTube, Supabase)
+- OpenAI API key
+- Supabase account and credentials
+- YouTube API credentials
+- Internet connection to Coral Protocol network
 
-### 2. Installation
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/Angus_Langchain.git
+   cd Angus_Langchain
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
+
+4. **Set up YouTube authentication**
+   ```bash
+   python youtube_auth_langchain.py
+   ```
+
+### Running Agent Angus
+
+#### Option A: Standalone LangChain Agent
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd angus_langchain
+# Run the unified LangChain agent
+python angus_langchain.py
 
-# Install dependencies
-pip install -r requirements.txt
+# Test specific workflows
+python angus_langchain.py --upload --upload-limit 5
+python angus_langchain.py --comments --reply-limit 10
+python angus_langchain.py --both --upload-limit 3 --reply-limit 5
 ```
 
-### 3. Configuration
+#### Option B: Coral Protocol Client 🌊 NEW!
 
 ```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit .env with your credentials
-nano .env
+# Connect Agent Angus to the Coral Protocol network
+python agents/angus_coral_client.py
 ```
 
-Required environment variables:
-```bash
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_openai_api_key
-YOUTUBE_CLIENT_ID=your_youtube_oauth_client_id
-YOUTUBE_CLIENT_SECRET=your_youtube_oauth_client_secret
-YOUTUBE_CHANNEL_ID=your_youtube_channel_id
+**Interactive Commands:**
 ```
-
-### 4. Validate Configuration
-
-```bash
-# Check environment setup
-python main.py --validate-env
-
-# Check all configurations
-python main.py --validate-config
-
-# Print environment summary
-python main.py --print-env
-```
-
-### 5. Start the System
-
-```bash
-# Start complete system (all agents + Coral server)
-python main.py --start
-
-# Start specific agents only
-python main.py --start --agents coordinator youtube database
-
-# Start only Coral server
-python main.py --server-only
-
-# Run single agent for testing
-python main.py --agent youtube
+Agent Angus> upload 5          # Upload 5 songs
+Agent Angus> comments 10       # Process 10 comments
+Agent Angus> analyze "pop song about summer"
+Agent Angus> quota             # Check YouTube quota
+Agent Angus> pending           # Show pending songs
+Agent Angus> status            # Show network status
+Agent Angus> help              # Show all commands
+Agent Angus> quit              # Disconnect
 ```
 
 ## 📁 Project Structure
 
 ```
 angus_langchain/
-├── agents/                    # Agent implementations
-│   ├── coordinator_agent.py   # Main orchestrator
-│   ├── youtube_agent.py       # YouTube operations
-│   ├── database_agent.py      # Supabase operations
-│   └── ai_agent.py            # OpenAI operations
-├── tools/                     # LangChain tools
-│   ├── youtube_tools.py       # YouTube LangChain tools
-│   ├── supabase_tools.py      # Database LangChain tools
-│   └── ai_tools.py            # AI analysis tools
-├── coral_integration/         # Coral Protocol integration
-│   ├── server_setup.py        # Server configuration
-│   ├── agent_registry.py      # Agent registration
-│   └── message_handlers.py    # Inter-agent communication
-├── config/                    # Configuration modules
-│   ├── environment.py         # Environment variables
-│   ├── agent_config.py        # Agent configurations
-│   └── coral_config.py        # Coral Protocol settings
-├── utils/                     # Utility modules
-├── tests/                     # Test suite
-├── main.py                    # Main entry point
-├── requirements.txt           # Dependencies
-├── .env.example              # Environment template
-└── README.md                 # This file
+├── agents/                          # Agent implementations
+│   ├── angus_langchain_agent.py    # Unified LangChain agent
+│   └── angus_coral_client.py       # Coral Protocol client ⭐ NEW
+├── tools/                          # LangChain tools
+│   ├── youtube_tools.py           # YouTube operations
+│   ├── supabase_tools.py          # Database operations
+│   └── ai_tools.py                # AI operations
+├── config/                         # Configuration
+│   ├── environment.py             # Environment variables
+│   ├── agent_config.py            # Agent configurations
+│   └── coral_config.py            # Coral Protocol settings
+├── coral_integration/              # Coral Protocol integration
+├── tests/                          # Test suite
+├── angus_langchain.py             # Main entry point (standalone)
+└── requirements.txt               # Dependencies
 ```
 
 ## 🔧 Available Tools
@@ -142,6 +163,7 @@ angus_langchain/
 - `reply_to_youtube_comment` - Post replies to comments
 - `check_upload_quota` - Monitor API quota usage
 - `get_video_details` - Retrieve video information
+- `process_video_comments` - Complete comment processing workflow
 
 ### Database Tools  
 - `get_pending_songs` - Find songs ready for upload
@@ -150,6 +172,7 @@ angus_langchain/
 - `get_song_details` - Retrieve song information
 - `get_uploaded_videos` - List uploaded content
 - `log_agent_activity` - System logging
+- `get_existing_feedback` - Check for duplicate processing
 
 ### AI Tools
 - `analyze_music_content` - OpenAI music analysis
@@ -159,107 +182,162 @@ angus_langchain/
 - `suggest_video_tags` - Recommend tags
 - `extract_music_metadata` - Audio metadata extraction
 
-## 🎮 Usage Examples
+### Workflow Tools (Coral Client Only)
+- `upload_workflow` - Complete song upload process
+- `comment_processing_workflow` - Complete comment processing
 
-### Basic Operations
+## 🛠️ Configuration
 
-```bash
-# Upload pending songs
-python main.py --start --agents coordinator youtube database
+### Environment Variables
 
-# Process YouTube comments
-python main.py --start --agents coordinator youtube ai database
+Create a `.env` file with the following variables:
 
-# Analyze music content
-python main.py --start --agents coordinator ai database
+```env
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key
+
+# Supabase Configuration
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-key
+
+# YouTube API Configuration
+YOUTUBE_CLIENT_ID=your-youtube-client-id
+YOUTUBE_CLIENT_SECRET=your-youtube-client-secret
+YOUTUBE_API_KEY=your-youtube-api-key
+YOUTUBE_CHANNEL_ID=your-youtube-channel-id
+
+# Coral Protocol Configuration (Optional - defaults to coral.pushcollective.club)
+CORAL_SERVER_URL=https://coral.pushcollective.club
+CORAL_SERVER_HOST=coral.pushcollective.club
+CORAL_SERVER_PORT=443
 ```
 
-### Development & Testing
+## 📋 Usage Examples
+
+### Standalone Agent Commands
 
 ```bash
-# Run in debug mode
-python main.py --start --debug
+# Upload songs with limit
+python angus_langchain.py --upload --upload-limit 5
 
-# Test single agent
-python main.py --agent youtube --verbose
+# Process comments with limit  
+python angus_langchain.py --comments --reply-limit 10
 
-# Validate setup
-python main.py --validate-config
+# Run both workflows
+python angus_langchain.py --both --upload-limit 3 --reply-limit 5
 ```
 
-### Monitoring
+### Coral Protocol Client Commands
 
 ```bash
-# Check system status
-curl http://localhost:5555/health
+# Start the Coral client
+python agents/angus_coral_client.py
 
-# View metrics
-curl http://localhost:5555/metrics
-
-# Agent-specific health
-curl http://localhost:8000/health  # Coordinator
-curl http://localhost:8001/health  # YouTube
-curl http://localhost:8002/health  # Database  
-curl http://localhost:8003/health  # AI
+# In the interactive session:
+Agent Angus> upload 5          # Upload 5 songs
+Agent Angus> comments 10       # Process 10 comments  
+Agent Angus> analyze "upbeat electronic music"
+Agent Angus> pending           # Show pending songs
+Agent Angus> videos            # Show uploaded videos
+Agent Angus> status            # Network connection status
 ```
 
 ## 🔄 Workflows
 
 ### Song Upload Workflow
-1. **Database Agent** retrieves pending songs
-2. **AI Agent** generates descriptions and tags
-3. **YouTube Agent** uploads videos
-4. **Database Agent** updates status
+1. Get pending songs from database
+2. Analyze music content with AI
+3. Upload videos to YouTube with generated metadata
+4. Update song status in database
 
 ### Comment Processing Workflow
-1. **Database Agent** gets uploaded videos
-2. **YouTube Agent** fetches comments
-3. **AI Agent** analyzes sentiment and generates responses
-4. **YouTube Agent** posts replies
-5. **Database Agent** stores feedback
+1. Get uploaded videos from database
+2. Fetch comments from YouTube
+3. Analyze comment sentiment with AI
+4. Generate appropriate responses
+5. Post replies to YouTube
+6. Store feedback in database
 
-## ⚙️ Configuration
+## 🌊 Coral Protocol Integration
 
-### Agent Configuration
-Each agent can be configured in `config/agent_config.py`:
+### Network Benefits
+- **Collaboration**: Work with other AI agents on the Coral network
+- **Resource Sharing**: Access tools and capabilities from other agents
+- **Scalability**: Distribute workload across multiple agents
+- **Resilience**: Fallback options when services are unavailable
 
-```python
-YOUTUBE_AGENT_CONFIG = {
-    "name": "angus_youtube",
-    "timeout": 600,  # 10 minutes for uploads
-    "rate_limits": {
-        "uploads_per_day": 6,
-        "api_calls_per_minute": 100
-    }
-}
+### Agent Capabilities Shared
+- Music analysis and content generation
+- YouTube automation expertise
+- Database management for music data
+- AI-powered comment processing
+
+### Network Communication
+- **Agent ID**: `agent_angus`
+- **Server**: `https://coral.pushcollective.club`
+- **Protocol**: Server-Sent Events (SSE) over HTTPS
+- **Tools Exposed**: 21 specialized music automation tools
+
+## 🔍 Monitoring
+
+### System Health
+
+```bash
+# Check standalone agent
+python -c "from agents.angus_langchain_agent import AngusLangChainAgent; agent = AngusLangChainAgent(); print(agent.health_check())"
+
+# Check Coral client connection (run from within the client)
+Agent Angus> status
 ```
 
-### Coral Protocol Settings
-Server and communication settings in `config/coral_config.py`:
+### Performance Metrics
 
-```python
-CORAL_SERVER_CONFIG = {
-    "host": "localhost",
-    "port": 5555,
-    "max_connections": 100,
-    "heartbeat_interval": 30
-}
+- **Upload Success Rate**: Percentage of successful song uploads
+- **Comment Response Rate**: Percentage of comments that receive responses
+- **API Usage**: YouTube and OpenAI API quota consumption
+- **Network Latency**: Response time to Coral Protocol network
+
+## 🚨 Troubleshooting
+
+### Common Issues
+
+1. **Coral Protocol Connection Issues**
+   ```bash
+   # Check network connectivity
+   curl https://coral.pushcollective.club
+   
+   # Verify environment configuration
+   python config/environment.py
+   ```
+
+2. **YouTube Authentication Errors**
+   ```bash
+   # Re-run authentication
+   python youtube_auth_langchain.py
+   ```
+
+3. **Supabase Connection Issues**
+   ```bash
+   # Check credentials and network
+   python -c "from tools.supabase_tools import get_supabase_client; get_supabase_client()"
+   ```
+
+4. **OpenAI API Errors**
+   ```bash
+   # Verify API key and quota
+   python -c "import openai; openai.api_key='your-key'; print(openai.Model.list())"
+   ```
+
+### Debug Mode
+
+```bash
+# Enable verbose logging
+export LOG_LEVEL=DEBUG
+export DEBUG_MODE=true
+
+# Run with debug output
+python agents/angus_coral_client.py
 ```
-
-## 🔍 Monitoring & Debugging
-
-### Logs
-- System logs: `angus_langchain.log`
-- Coral server logs: `coral_server.log`
-- Agent-specific logs in Supabase `angus_logs` table
-
-### Health Checks
-- System health: `http://localhost:5555/health`
-- Individual agents: `http://localhost:800X/health`
-
-### Metrics
-- Prometheus metrics: `http://localhost:5555/metrics`
-- Custom metrics for workflows and performance
 
 ## 🧪 Testing
 
@@ -270,100 +348,84 @@ pytest
 # Test specific components
 pytest tests/test_tools.py
 pytest tests/test_agents.py
-pytest tests/test_integration.py
+pytest tests/test_coral_integration.py
 
-# Test with coverage
-pytest --cov=. --cov-report=html
+# Run with coverage
+pytest --cov=agents --cov=tools
 ```
-
-## 🚀 Deployment
-
-### Docker Deployment
-```bash
-# Build and run with Docker Compose
-docker-compose up -d
-
-# Scale specific agents
-docker-compose up --scale youtube-agent=2 --scale ai-agent=3
-```
-
-### Production Considerations
-- Set `AUTHENTICATION_ENABLED=true`
-- Configure SSL certificates
-- Set up proper monitoring and alerting
-- Use Redis for message queuing
-- Configure load balancing
 
 ## 🔧 Development
 
 ### Adding New Tools
-1. Create tool function with `@tool` decorator
-2. Add to appropriate tools module
-3. Update agent configuration
-4. Add tests
 
-### Adding New Agents
-1. Create agent class inheriting from base agent
-2. Define tools and capabilities
-3. Add to agent registry
-4. Update main.py imports
+1. Create tool function in appropriate `tools/` file:
+   ```python
+   @tool
+   def my_new_tool(param: str) -> str:
+       """Tool description."""
+       # Implementation
+       return result
+   ```
 
-### Extending Workflows
-1. Define workflow in `config/agent_config.py`
-2. Implement in coordinator agent
-3. Add monitoring and error handling
+2. Add to agent's tool list in `agents/angus_coral_client.py`
 
-## 📋 Migration from Original Agent Angus
+3. Update agent prompt to include tool description
 
-### Phase 1: Tool Conversion ✅
-- [x] YouTube tools implemented
-- [x] Supabase tools implemented  
-- [x] AI tools implemented
-- [x] Configuration system
-- [x] Main entry point
+### Coral Protocol Integration
 
-### Phase 2: Coral Integration (Next)
-- [ ] Coral server setup
-- [ ] Agent registry implementation
-- [ ] Message routing system
+The Coral client automatically:
+- Connects to the network on startup
+- Registers Agent Angus's capabilities
+- Shares tools with other agents
+- Handles network communication
+- Provides fallback for network issues
 
-### Phase 3: Multi-Agent Implementation (Planned)
-- [ ] Coordinator agent
-- [ ] Specialized agents
-- [ ] Workflow orchestration
+## 📋 Implementation Status
 
-### Phase 4: Enhanced Features (Future)
-- [ ] Advanced monitoring
-- [ ] Load balancing
-- [ ] Fault tolerance
-- [ ] Performance optimization
+### ✅ COMPLETE
+- **Standalone LangChain Agent**: Full Agent Angus functionality
+- **Coral Protocol Client**: Connected to coral.pushcollective.club
+- **Tool Integration**: All 21 tools available on the network
+- **Workflow Automation**: Complete upload and comment processing
+- **Error Handling**: Robust retry logic and graceful failures
+- **Interactive Interface**: User-friendly command system
+
+### 🚀 Future Enhancements
+- Advanced monitoring dashboard
+- Performance optimization
+- Additional workflow types
+- Enhanced collaboration features
+- Production deployment guides
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and add tests
+4. Commit your changes: `git commit -m 'Add amazing feature'`
+5. Push to the branch: `git push origin feature/amazing-feature`
+6. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+## 🙏 Acknowledgments
 
-- **Issues**: GitHub Issues
-- **Documentation**: See `/docs` directory
-- **Examples**: See `/examples` directory
+- [LangChain](https://langchain.com/) for the agent framework
+- [Coral Protocol](https://coral.pushcollective.club/) for the distributed AI network
+- [OpenAI](https://openai.com/) for AI capabilities
+- [Supabase](https://supabase.com/) for database services
+- [YouTube API](https://developers.google.com/youtube) for video platform integration
 
-## 🔗 Related Projects
+## 📞 Support
 
-- [Original Agent Angus](../Angus) - Monolithic version
-- [Coral Protocol](https://github.com/Coral-Protocol/coral-server) - Multi-agent framework
-- [LangChain](https://github.com/langchain-ai/langchain) - LLM application framework
+- **Issues**: [GitHub Issues](https://github.com/your-username/Angus_Langchain/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-username/Angus_Langchain/discussions)
+- **Coral Network**: [coral.pushcollective.club](https://coral.pushcollective.club)
 
 ---
 
-**Status**: Phase 1 Complete - Ready for Coral Protocol Integration
-**Next Steps**: Implement Coral server setup and agent registry
-**Timeline**: 4-6 weeks for full implementation
+**🎉 Status**: Coral Protocol Client Integration Complete!
+**🌊 Network**: Connected to coral.pushcollective.club
+**🎵 Capabilities**: Music automation agent ready for collaboration

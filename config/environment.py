@@ -36,9 +36,9 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 SONOTELLER_API_KEY = os.getenv("SONOTELLER_API_KEY", "58fafc6204msh41ac38769729b59p17fbc3jsneeebeb330eb2")
 
 # Coral Protocol specific configuration
-CORAL_SERVER_HOST = os.getenv("CORAL_SERVER_HOST", "localhost")
-CORAL_SERVER_PORT = int(os.getenv("CORAL_SERVER_PORT", "5555"))
-CORAL_SERVER_URL = f"http://{CORAL_SERVER_HOST}:{CORAL_SERVER_PORT}"
+CORAL_SERVER_HOST = os.getenv("CORAL_SERVER_HOST", "coral.pushcollective.club")
+CORAL_SERVER_PORT = int(os.getenv("CORAL_SERVER_PORT", "443"))
+CORAL_SERVER_URL = os.getenv("CORAL_SERVER_URL", "https://coral.pushcollective.club")
 
 # Agent configuration
 AGENT_LOG_LEVEL = os.getenv("AGENT_LOG_LEVEL", "INFO")
