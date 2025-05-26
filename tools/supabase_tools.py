@@ -9,8 +9,8 @@ import logging
 from typing import Dict, Any, List, Optional
 from langchain.tools import tool
 
-# Add the parent directory to the path to import from original Angus
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'Angus'))
+# Add the original Angus directory to the path
+sys.path.append('E:/Plank pushers/Angus')
 
 try:
     from supabase_client import SupabaseClient
