@@ -28,24 +28,25 @@ def check_requirements():
     """Check if required dependencies are installed."""
     print("🔍 Checking requirements...")
     
+    # Package name to import name mapping
     required_packages = [
-        "langchain",
-        "langchain_mcp_adapters", 
-        "langchain_openai",
-        "openai",
-        "supabase",
-        "google-api-python-client"
+        ("langchain", "langchain"),
+        ("langchain_mcp_adapters", "langchain_mcp_adapters"), 
+        ("langchain_openai", "langchain_openai"),
+        ("openai", "openai"),
+        ("supabase", "supabase"),
+        ("google-api-python-client", "googleapiclient")  # Fixed: use correct import name
     ]
     
     missing_packages = []
     
-    for package in required_packages:
+    for package_name, import_name in required_packages:
         try:
-            __import__(package.replace("-", "_"))
-            print(f"  ✅ {package}")
+            __import__(import_name)
+            print(f"  ✅ {package_name}")
         except ImportError:
-            print(f"  ❌ {package}")
-            missing_packages.append(package)
+            print(f"  ❌ {package_name}")
+            missing_packages.append(package_name)
     
     if missing_packages:
         print(f"\n❌ Missing packages: {', '.join(missing_packages)}")
