@@ -10,7 +10,7 @@ from typing import Dict, Any, List, Optional
 from langchain.tools import tool
 
 # Add the original Angus directory to the path
-sys.path.append('E:/Plank pushers/Angus')
+sys.path.append('/opt/Angus-vibe')
 
 try:
     from youtube_client import YouTubeClient
