@@ -266,8 +266,12 @@ Always be helpful, accurate, and focused on music publishing workflows."""
         """Close MCP client connections."""
         if self.client:
             try:
-                await self.client.close()
-                logger.info("MCP client connections closed")
+                # Check if the client has a close method before calling it
+                if hasattr(self.client, 'close'):
+                    await self.client.close()
+                    logger.info("MCP client connections closed")
+                else:
+                    logger.info("MCP client closed (no close method available)")
             except Exception as e:
                 logger.error(f"Error closing MCP client: {str(e)}")
         
