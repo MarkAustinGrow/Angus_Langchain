@@ -410,29 +410,43 @@ async def main():
         logger.info("🎵 Agent Angus Coraliser mode started successfully!")
         logger.info("Ready for inter-agent collaboration and music automation tasks")
         
-        # Persistent agent listening loop - maintains stable session for communication
+        # Persistent agent listening with stable session management
         logger.info("🎵 Starting persistent listening mode for inter-agent communication")
+        
+        # Initialize agent state for persistent operation
+        agent_state = {"agent_scratchpad": []}
+        session_established = False
         
         while True:
             try:
-                # Single agent invocation that handles continuous listening
-                logger.info("Agent Angus listening for mentions from other agents...")
-                result = await agent_executor.ainvoke({"agent_scratchpad": []})
+                if not session_established:
+                    logger.info("🌊 Establishing stable Coral session for Agent Yona communication...")
+                    session_established = True
+                else:
+                    logger.info("🎵 Agent Angus listening on stable session for mentions...")
                 
-                # Log any successful interactions
+                # Single agent invocation with persistent state
+                result = await agent_executor.ainvoke(agent_state)
+                
+                # Log successful interactions
                 if result and "output" in result:
-                    logger.info(f"Agent interaction completed: {result['output'][:200]}...")
+                    logger.info(f"✅ Agent interaction: {result['output'][:200]}...")
+                    # Update agent state to maintain conversation context
+                    if "intermediate_steps" in result:
+                        agent_state["agent_scratchpad"] = result["intermediate_steps"]
                 
-                # Brief pause before next listening cycle (allows for proper communication)
-                await asyncio.sleep(2)
+                # Longer pause to allow proper inter-agent communication windows
+                logger.info("💤 Waiting 5 seconds before next listening cycle...")
+                await asyncio.sleep(5)
                 
             except KeyboardInterrupt:
-                logger.info("Agent Angus shutting down gracefully...")
+                logger.info("🛑 Agent Angus shutting down gracefully...")
                 break
             except Exception as e:
-                logger.error(f"Error in agent communication: {str(e)}")
-                logger.info("Attempting to reconnect in 10 seconds...")
-                await asyncio.sleep(10)
+                logger.error(f"❌ Error in agent communication: {str(e)}")
+                logger.info("🔄 Attempting to reconnect in 15 seconds...")
+                session_established = False  # Force session re-establishment
+                await asyncio.sleep(15)
                 
     except Exception as e:
         logger.error(f"Failed to start Agent Angus: {str(e)}")
