@@ -357,19 +357,28 @@ Your responses should be helpful, professional, and focused on music automation 
 
 async def main():
     """Main function to run Agent Angus in Coraliser mode."""
-    async with MultiServerMCPClient(
-        connections={
-            "coral": {
-                "command": "npx",
-                "args": ["-y", "@modelcontextprotocol/server-everything"],
-                "env": {"MCP_SERVER_URL": MCP_SERVER_URL}
+    try:
+        # Create MCP client (new API - no context manager)
+        client = MultiServerMCPClient(
+            connections={
+                "coral": {
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-everything"],
+                    "env": {"MCP_SERVER_URL": MCP_SERVER_URL}
+                }
             }
-        }
-    ) as client:
-        logger.info(f"Connected to MCP server at {MCP_SERVER_URL}")
+        )
         
-        # Get Coral tools
-        coral_tools = client.get_tools()
+        logger.info(f"Attempting to connect to MCP server at {MCP_SERVER_URL}")
+        
+        # Get Coral tools (may fail if server not available)
+        try:
+            coral_tools = await client.get_tools()
+            logger.info(f"Successfully connected to Coral server, got {len(coral_tools)} tools")
+        except Exception as e:
+            logger.warning(f"Could not connect to Coral server: {str(e)}")
+            logger.info("Continuing with Agent Angus tools only")
+            coral_tools = []
         
         # Get Agent Angus specialized tools
         angus_tools = [
@@ -381,10 +390,14 @@ async def main():
         # Combine all tools
         all_tools = coral_tools + angus_tools
         
+        logger.info(f"Total tools available: {len(all_tools)} (Coral: {len(coral_tools)}, Angus: {len(angus_tools)})")
         logger.info(f"Tools Description:\n{get_tools_description(all_tools)}")
         
         # Create agent
         agent_executor = await create_angus_music_agent(client, all_tools, angus_tools)
+        
+        logger.info("🎵 Agent Angus Coraliser mode started successfully!")
+        logger.info("Ready for inter-agent collaboration and music automation tasks")
         
         # Main agent loop
         while True:
@@ -396,6 +409,10 @@ async def main():
             except Exception as e:
                 logger.error(f"Error in agent loop: {str(e)}")
                 await asyncio.sleep(5)
+                
+    except Exception as e:
+        logger.error(f"Failed to start Agent Angus: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     asyncio.run(main())
