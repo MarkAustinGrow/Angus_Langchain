@@ -367,94 +367,48 @@ Your responses should be helpful, professional, and focused on music automation 
 
 async def main():
     """Main function to run Agent Angus in Coraliser mode."""
-    try:
-        # Create MCP client with proper SSE transport configuration
-        client = MultiServerMCPClient(
-            connections={
-                "coral": {
-                    "transport": "sse",
-                    "url": MCP_SERVER_URL,
-                    "timeout": 300,
-                    "sse_read_timeout": 300,
-                }
+    # Use official Coral Protocol pattern from LangChain WorldNews example
+    async with MultiServerMCPClient(
+        connections={
+            "coral": {
+                "command": "npx",
+                "args": ["-y", "@modelcontextprotocol/server-everything"],
+                "env": {"MCP_SERVER_URL": MCP_SERVER_URL}
             }
-        )
+        }
+    ) as client:
+        logger.info(f"Connected to MCP server at {MCP_SERVER_URL}")
         
-        logger.info(f"Attempting to connect to MCP server at {MCP_SERVER_URL}")
-        
-        # Get Coral tools (may fail if server not available)
-        try:
-            coral_tools = await client.get_tools()
-            logger.info(f"Successfully connected to Coral server, got {len(coral_tools)} tools")
-        except Exception as e:
-            logger.warning(f"Could not connect to Coral server: {str(e)}")
-            logger.info("Continuing with Agent Angus tools only")
-            coral_tools = []
-        
-        # Get Agent Angus specialized tools
-        angus_tools = [
+        # Get tools following official pattern
+        tools = client.get_tools() + [
             AngusYouTubeUploadTool,
-            AngusCommentProcessingTool, 
+            AngusCommentProcessingTool,
+            AngusQuotaCheckTool
+        ]
+        agent_tool = [
+            AngusYouTubeUploadTool,
+            AngusCommentProcessingTool,
             AngusQuotaCheckTool
         ]
         
-        # Combine all tools
-        all_tools = coral_tools + angus_tools
+        logger.info(f"Tools Description:\n{get_tools_description(tools)}")
         
-        logger.info(f"Total tools available: {len(all_tools)} (Coral: {len(coral_tools)}, Angus: {len(angus_tools)})")
-        logger.info(f"Tools Description:\n{get_tools_description(all_tools)}")
-        
-        # Create agent
-        agent_executor = await create_angus_music_agent(client, all_tools, angus_tools)
+        # Create agent following official pattern
+        agent_executor = await create_angus_music_agent(client, tools, agent_tool)
         
         logger.info("🎵 Agent Angus Coraliser mode started successfully!")
         logger.info("Ready for inter-agent collaboration and music automation tasks")
         
-        # Thread-based communication to eliminate session churn
-        logger.info("🎵 Starting thread-based communication mode for stable Agent Yona integration")
-        
-        # Initialize agent state for persistent operation
-        agent_state = {"agent_scratchpad": []}
-        active_threads = {}  # Track active communication threads
-        
+        # Official Coral Protocol agent loop pattern
         while True:
             try:
-                logger.info("🌊 Agent Angus checking for new communication opportunities...")
-                
-                # Check for mentions with shorter timeout to reduce session churn
-                result = await agent_executor.ainvoke({
-                    **agent_state,
-                    "instructions": "Check for mentions briefly, then list available agents and create/manage communication threads"
-                })
-                
-                # Log successful interactions
-                if result and "output" in result:
-                    output = result["output"]
-                    logger.info(f"✅ Agent interaction: {output[:200]}...")
-                    
-                    # Update agent state to maintain conversation context
-                    if "intermediate_steps" in result:
-                        agent_state["agent_scratchpad"] = result["intermediate_steps"]
-                    
-                    # Check if we received any mentions or thread communications
-                    if "mention" in output.lower() or "thread" in output.lower():
-                        logger.info("📨 Received communication from another agent!")
-                
-                # Longer pause to reduce session churn and allow stable communication
-                logger.info("💤 Waiting 10 seconds before next communication check...")
-                await asyncio.sleep(10)
-                
-            except KeyboardInterrupt:
-                logger.info("🛑 Agent Angus shutting down gracefully...")
-                break
+                logger.info("Starting new agent invocation")
+                await agent_executor.ainvoke({"agent_scratchpad": []})
+                logger.info("Completed agent invocation, restarting loop")
+                await asyncio.sleep(1)
             except Exception as e:
-                logger.error(f"❌ Error in agent communication: {str(e)}")
-                logger.info("🔄 Attempting to reconnect in 20 seconds...")
-                await asyncio.sleep(20)
-                
-    except Exception as e:
-        logger.error(f"Failed to start Agent Angus: {str(e)}")
-        raise
+                logger.error(f"Error in agent loop: {str(e)}")
+                await asyncio.sleep(5)
 
 if __name__ == "__main__":
     asyncio.run(main())
