@@ -410,43 +410,47 @@ async def main():
         logger.info("🎵 Agent Angus Coraliser mode started successfully!")
         logger.info("Ready for inter-agent collaboration and music automation tasks")
         
-        # Persistent agent listening with stable session management
-        logger.info("🎵 Starting persistent listening mode for inter-agent communication")
+        # Thread-based communication to eliminate session churn
+        logger.info("🎵 Starting thread-based communication mode for stable Agent Yona integration")
         
         # Initialize agent state for persistent operation
         agent_state = {"agent_scratchpad": []}
-        session_established = False
+        active_threads = {}  # Track active communication threads
         
         while True:
             try:
-                if not session_established:
-                    logger.info("🌊 Establishing stable Coral session for Agent Yona communication...")
-                    session_established = True
-                else:
-                    logger.info("🎵 Agent Angus listening on stable session for mentions...")
+                logger.info("🌊 Agent Angus checking for new communication opportunities...")
                 
-                # Single agent invocation with persistent state
-                result = await agent_executor.ainvoke(agent_state)
+                # Check for mentions with shorter timeout to reduce session churn
+                result = await agent_executor.ainvoke({
+                    **agent_state,
+                    "instructions": "Check for mentions briefly, then list available agents and create/manage communication threads"
+                })
                 
                 # Log successful interactions
                 if result and "output" in result:
-                    logger.info(f"✅ Agent interaction: {result['output'][:200]}...")
+                    output = result["output"]
+                    logger.info(f"✅ Agent interaction: {output[:200]}...")
+                    
                     # Update agent state to maintain conversation context
                     if "intermediate_steps" in result:
                         agent_state["agent_scratchpad"] = result["intermediate_steps"]
+                    
+                    # Check if we received any mentions or thread communications
+                    if "mention" in output.lower() or "thread" in output.lower():
+                        logger.info("📨 Received communication from another agent!")
                 
-                # Longer pause to allow proper inter-agent communication windows
-                logger.info("💤 Waiting 5 seconds before next listening cycle...")
-                await asyncio.sleep(5)
+                # Longer pause to reduce session churn and allow stable communication
+                logger.info("💤 Waiting 10 seconds before next communication check...")
+                await asyncio.sleep(10)
                 
             except KeyboardInterrupt:
                 logger.info("🛑 Agent Angus shutting down gracefully...")
                 break
             except Exception as e:
                 logger.error(f"❌ Error in agent communication: {str(e)}")
-                logger.info("🔄 Attempting to reconnect in 15 seconds...")
-                session_established = False  # Force session re-establishment
-                await asyncio.sleep(15)
+                logger.info("🔄 Attempting to reconnect in 20 seconds...")
+                await asyncio.sleep(20)
                 
     except Exception as e:
         logger.error(f"Failed to start Agent Angus: {str(e)}")
