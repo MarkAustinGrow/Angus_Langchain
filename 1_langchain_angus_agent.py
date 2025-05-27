@@ -57,11 +57,11 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 # Configuration
-base_url = "http://localhost:5555/devmode/exampleApplication/privkey/session1/sse"
+base_url = "http://coral.pushcollective.club:5555/devmode/exampleApplication/privkey/session1/sse"
 params = {
-    "waitForAgentS": 2,
+    "waitForAgents": 1,
     "agentId": "angus_music_agent",
-    "agentDescription": "You are Agent Angus, responsible for music publishing automation on YouTube. You handle song uploads, comment processing, and AI-powered music analysis. You collaborate with other agents in the Coral network to provide comprehensive music automation services."
+    "agentDescription": "Agent Angus - Music publishing automation specialist for YouTube. Handles song uploads, comment processing, and AI-powered music analysis. Collaborates with other agents in the Coral network to provide comprehensive music automation services."
 }
 query_string = urlencode(params)
 MCP_SERVER_URL = f"{base_url}?{query_string}"
@@ -368,13 +368,14 @@ Your responses should be helpful, professional, and focused on music automation 
 async def main():
     """Main function to run Agent Angus in Coraliser mode."""
     try:
-        # Create MCP client (new API - no context manager)
+        # Create MCP client with proper SSE transport configuration
         client = MultiServerMCPClient(
             connections={
                 "coral": {
-                    "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-everything"],
-                    "env": {"MCP_SERVER_URL": MCP_SERVER_URL}
+                    "transport": "sse",
+                    "url": MCP_SERVER_URL,
+                    "timeout": 300,
+                    "sse_read_timeout": 300,
                 }
             }
         )
