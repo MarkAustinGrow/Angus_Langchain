@@ -115,7 +115,7 @@ python angus_langchain.py --comments --reply-limit 10
 python angus_langchain.py --both --upload-limit 3 --reply-limit 5
 ```
 
-#### Option B: Coral Protocol Client 🌊 NEW!
+#### Option B: Coral Protocol Client 🌊
 
 ```bash
 # Connect Agent Angus to the Coral Protocol network
@@ -132,6 +132,29 @@ Agent Angus> pending           # Show pending songs
 Agent Angus> status            # Show network status
 Agent Angus> help              # Show all commands
 Agent Angus> quit              # Disconnect
+```
+
+#### Option C: OpenAI-Compatible API 🔌 NEW!
+
+```bash
+# Start the OpenAI-compatible HTTP wrapper
+python start_angus_openai_wrapper.py
+
+# Use with any OpenAI-compatible client
+curl -X POST http://localhost:8001/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "angus-v1",
+    "messages": [
+      {"role": "user", "content": "Upload 3 songs to YouTube"}
+    ]
+  }'
+```
+
+**For Coraliser Integration:**
+```bash
+# Use the provided settings file
+python coraliser.py --settings coraliser_settings.json
 ```
 
 ## 📁 Project Structure

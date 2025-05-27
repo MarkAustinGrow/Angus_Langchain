@@ -1,0 +1,30 @@
+{
+  "agents": [
+    {
+      "name": "angus",
+      "host": "http://localhost:8001",
+      "description": "Music automation agent using STDIO MCP - handles YouTube uploads, comment processing, and AI music analysis",
+      "api_key": "",
+      "capabilities": [
+        "YouTube automation",
+        "Database operations", 
+        "AI music analysis",
+        "Comment processing",
+        "Song upload workflows"
+      ],
+      "endpoints": {
+        "chat_completions": "/v1/chat/completions",
+        "models": "/v1/models",
+        "health": "/health",
+        "status": "/v1/agent/status",
+        "tools": "/v1/agent/tools"
+      }
+    }
+  ],
+  "coral_server_url": "http://localhost:5000",
+  "settings": {
+    "timeout": 30,
+    "retry_attempts": 3,
+    "log_level": "INFO"
+  }
+}
