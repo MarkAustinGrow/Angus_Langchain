@@ -410,16 +410,29 @@ async def main():
         logger.info("🎵 Agent Angus Coraliser mode started successfully!")
         logger.info("Ready for inter-agent collaboration and music automation tasks")
         
-        # Main agent loop
+        # Persistent agent listening loop - maintains stable session for communication
+        logger.info("🎵 Starting persistent listening mode for inter-agent communication")
+        
         while True:
             try:
-                logger.info("Starting new agent invocation")
-                await agent_executor.ainvoke({"agent_scratchpad": []})
-                logger.info("Completed agent invocation, restarting loop")
-                await asyncio.sleep(1)
+                # Single agent invocation that handles continuous listening
+                logger.info("Agent Angus listening for mentions from other agents...")
+                result = await agent_executor.ainvoke({"agent_scratchpad": []})
+                
+                # Log any successful interactions
+                if result and "output" in result:
+                    logger.info(f"Agent interaction completed: {result['output'][:200]}...")
+                
+                # Brief pause before next listening cycle (allows for proper communication)
+                await asyncio.sleep(2)
+                
+            except KeyboardInterrupt:
+                logger.info("Agent Angus shutting down gracefully...")
+                break
             except Exception as e:
-                logger.error(f"Error in agent loop: {str(e)}")
-                await asyncio.sleep(5)
+                logger.error(f"Error in agent communication: {str(e)}")
+                logger.info("Attempting to reconnect in 10 seconds...")
+                await asyncio.sleep(10)
                 
     except Exception as e:
         logger.error(f"Failed to start Agent Angus: {str(e)}")
