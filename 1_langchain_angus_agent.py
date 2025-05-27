@@ -367,30 +367,42 @@ Your responses should be helpful, professional, and focused on music automation 
 
 async def main():
     """Main function to run Agent Angus in Coraliser mode."""
-    # Use official Coral Protocol pattern from LangChain WorldNews example
-    async with MultiServerMCPClient(
-        connections={
-            "coral": {
-                "command": "npx",
-                "args": ["-y", "@modelcontextprotocol/server-everything"],
-                "env": {"MCP_SERVER_URL": MCP_SERVER_URL}
+    try:
+        # Use new MCP API (compatible with 0.1.0) with official Coral patterns
+        client = MultiServerMCPClient(
+            connections={
+                "coral": {
+                    "transport": "sse",
+                    "url": MCP_SERVER_URL,
+                    "timeout": 300,
+                    "sse_read_timeout": 300,
+                }
             }
-        }
-    ) as client:
-        logger.info(f"Connected to MCP server at {MCP_SERVER_URL}")
+        )
         
-        # Get tools following official pattern
-        tools = client.get_tools() + [
+        logger.info(f"Attempting to connect to MCP server at {MCP_SERVER_URL}")
+        
+        # Get Coral tools (may fail if server not available)
+        try:
+            coral_tools = await client.get_tools()
+            logger.info(f"Successfully connected to Coral server, got {len(coral_tools)} tools")
+        except Exception as e:
+            logger.warning(f"Could not connect to Coral server: {str(e)}")
+            logger.info("Continuing with Agent Angus tools only")
+            coral_tools = []
+        
+        # Get Agent Angus specialized tools (following official pattern)
+        angus_tools = [
             AngusYouTubeUploadTool,
             AngusCommentProcessingTool,
             AngusQuotaCheckTool
         ]
-        agent_tool = [
-            AngusYouTubeUploadTool,
-            AngusCommentProcessingTool,
-            AngusQuotaCheckTool
-        ]
         
+        # Combine tools following official pattern
+        tools = coral_tools + angus_tools
+        agent_tool = angus_tools
+        
+        logger.info(f"Total tools available: {len(tools)} (Coral: {len(coral_tools)}, Angus: {len(angus_tools)})")
         logger.info(f"Tools Description:\n{get_tools_description(tools)}")
         
         # Create agent following official pattern
@@ -399,7 +411,7 @@ async def main():
         logger.info("🎵 Agent Angus Coraliser mode started successfully!")
         logger.info("Ready for inter-agent collaboration and music automation tasks")
         
-        # Official Coral Protocol agent loop pattern
+        # Official Coral Protocol agent loop pattern (from LangChain WorldNews)
         while True:
             try:
                 logger.info("Starting new agent invocation")
@@ -409,6 +421,10 @@ async def main():
             except Exception as e:
                 logger.error(f"Error in agent loop: {str(e)}")
                 await asyncio.sleep(5)
+                
+    except Exception as e:
+        logger.error(f"Failed to start Agent Angus: {str(e)}")
+        raise
 
 if __name__ == "__main__":
     asyncio.run(main())
