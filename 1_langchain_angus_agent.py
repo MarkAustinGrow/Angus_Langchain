@@ -98,7 +98,12 @@ def AngusYouTubeUploadTool(
         if not pending_result or "error" in pending_result:
             return {"result": f"Failed to get pending songs: {pending_result}"}
         
-        songs = pending_result.get("songs", [])
+        # Handle both dict and list responses
+        if isinstance(pending_result, dict):
+            songs = pending_result.get("songs", [])
+        else:
+            songs = pending_result  # Direct list response
+            
         if not songs:
             return {"result": "No pending songs found for upload"}
         
@@ -188,7 +193,12 @@ def AngusCommentProcessingTool(
         if not videos_result or "error" in videos_result:
             return {"result": f"Failed to get uploaded videos: {videos_result}"}
         
-        videos = videos_result.get("videos", [])
+        # Handle both dict and list responses
+        if isinstance(videos_result, dict):
+            videos = videos_result.get("videos", [])
+        else:
+            videos = videos_result  # Direct list response
+            
         if not videos:
             return {"result": "No uploaded videos found for comment processing"}
         
